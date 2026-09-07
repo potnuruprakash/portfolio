@@ -5,29 +5,122 @@
 "use strict";
 
 /* ──────────────────────────────────────────────────────────────
-   1. LOADING SCREEN
+   1. INTRO VIDEO & SCREEN LOCK CONTROLLER
+   - Strict viewport lock (mouse wheel, touch, keyboard)
+   - Zero content leak from the portfolio underneath
+   - Seamless cinematic transition on video end or skip
 ────────────────────────────────────────────────────────────── */
-(function initLoader() {
-  const loader = document.getElementById("loading-screen");
-  const loaderText = loader.querySelector(".loader-text");
-  const messages = ["Initializing...", "Loading assets...", "Compiling portfolio...", "Almost ready..."];
-  let msgIdx = 0;
+(function initIntro() {
+  const overlay   = document.getElementById("intro-overlay") || document.getElementById("video-overlay");
+  const video     = document.getElementById("intro-video");
+  const skip      = document.getElementById("video-skip");
+  const portfolio = document.getElementById("portfolio");
 
-  const interval = setInterval(() => {
-    msgIdx = (msgIdx + 1) % messages.length;
-    loaderText.textContent = messages[msgIdx];
-  }, 500);
+  let isIntroActive = true;
 
-  window.addEventListener("load", () => {
-    clearInterval(interval);
+  // ── Immediate screen & scroll lock
+  document.documentElement.classList.add("intro-active");
+  document.body.classList.add("intro-active");
+  window.scrollTo(0, 0);
+
+  // ── Prevent all scrolling vectors while intro is active
+  function preventScroll(e) {
+    if (isIntroActive) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }
+
+  // ── Prevent keyboard navigation & scrolling during intro
+  function preventScrollKeys(e) {
+    if (!isIntroActive) return;
+    const blockedKeys = [
+      "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
+      "PageUp", "PageDown", "Home", "End", " ", "Spacebar"
+    ];
+    if (blockedKeys.includes(e.key) || blockedKeys.includes(e.code)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }
+
+  window.addEventListener("wheel", preventScroll, { passive: false });
+  window.addEventListener("touchmove", preventScroll, { passive: false });
+  window.addEventListener("keydown", preventScrollKeys, { passive: false });
+
+  // ── Finish intro transition
+  let introFinished = false;
+  function finishIntro() {
+    if (introFinished) return;
+    introFinished = true;
+    isIntroActive = false;
+
+    // Pause video
+    if (video) {
+      try { video.pause(); } catch (_) {}
+    }
+
+    // Remove scroll prevention listeners
+    window.removeEventListener("wheel", preventScroll);
+    window.removeEventListener("touchmove", preventScroll);
+    window.removeEventListener("keydown", preventScrollKeys);
+
+    // Reveal portfolio smoothly
+    if (portfolio) {
+      portfolio.style.visibility = "visible";
+      portfolio.style.opacity = "1";
+      portfolio.removeAttribute("aria-hidden");
+    }
+
+    // Start overlay fade-out
+    if (overlay) {
+      overlay.classList.add("fade-out");
+    }
+
+    // Unlock page scrolling
+    document.documentElement.classList.remove("intro-active");
+    document.body.classList.remove("intro-active");
+    document.body.style.overflow = "";
+
+    // Remove overlay from accessibility & DOM display after cinematic fade
     setTimeout(() => {
-      loader.classList.add("hidden");
-      document.body.style.overflow = "auto";
-      initCounters();
-    }, 2200);
-  });
+      if (overlay) {
+        overlay.classList.add("hidden");
+        overlay.style.display = "none";
+      }
+      if (typeof initCounters === "function") {
+        initCounters();
+      }
+    }, 1200);
+  }
 
-  document.body.style.overflow = "hidden";
+  // ── Video Events
+  if (video) {
+    video.addEventListener("ended", finishIntro);
+    video.addEventListener("error", () => {
+      console.warn("Intro video error — transitioning to portfolio");
+      setTimeout(finishIntro, 500);
+    });
+
+    // Ensure autoplay works
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Autoplay policy prevented playback; wait briefly then transition
+        setTimeout(finishIntro, 1200);
+      });
+    }
+  }
+
+  // ── Skip button
+  if (skip) {
+    skip.addEventListener("click", finishIntro);
+  }
+
+  // ── Safety timeout in case of unexpected video hang
+  setTimeout(finishIntro, 25000);
 })();
 
 /* ──────────────────────────────────────────────────────────────
@@ -143,62 +236,7 @@
   animate();
 })();
 
-/* ──────────────────────────────────────────────────────────────
-   4. INTRO VIDEO — cinematic professional
-────────────────────────────────────────────────────────────── */
-(function initVideo() {
-  const overlay    = document.getElementById("video-overlay");
-  const video      = document.getElementById("intro-video");
-  const skip       = document.getElementById("video-skip");
-  const unmuteCta  = document.getElementById("vid-unmute-cta");
-  const unmuteBtn  = document.getElementById("vid-unmute-btn");
-  const unmuteIcon = document.getElementById("vid-unmute-icon");
-
-  // ── Hide overlay with cinematic fade
-  function hideOverlay() {
-    overlay.classList.add("fade-out");
-    setTimeout(() => overlay.classList.add("hidden"), 1600);
-  }
-
-  // ── Video ended
-  video.addEventListener("ended", hideOverlay);
-
-  // ── Skip button
-  if (skip) skip.addEventListener("click", hideOverlay);
-
-  // ── Centre unmute button click
-  if (unmuteBtn) {
-    unmuteBtn.addEventListener("click", () => {
-      video.muted = false;
-      video.volume = 1;
-      if (unmuteIcon) unmuteIcon.className = "fa-solid fa-volume-high";
-      if (unmuteCta) unmuteCta.classList.add("hidden-cta");
-    });
-  }
-
-  // ── If unmuted by any means, hide the cta
-  video.addEventListener("volumechange", () => {
-    if (!video.muted && unmuteCta) unmuteCta.classList.add("hidden-cta");
-  });
-
-  // ── Error fallback
-  video.addEventListener("error", () => {
-    console.warn("Intro video: error loading — skipping.");
-    setTimeout(hideOverlay, 500);
-  });
-
-  // ── Ensure play (explicit call needed in some browsers)
-  const p = video.play();
-  if (p !== undefined) {
-    p.catch(() => {
-      // Autoplay blocked entirely — skip to hero after short pause
-      setTimeout(hideOverlay, 1000);
-    });
-  }
-
-  // ── Safety timeout 30s
-  setTimeout(hideOverlay, 30000);
-})();
+// (Intro video controller is consolidated in Section 1 above)
 
 /* ──────────────────────────────────────────────────────────────
    5. NAVBAR SCROLL & ACTIVE LINKS
@@ -236,8 +274,9 @@
 
   // Mobile toggle
   toggle.addEventListener("click", () => {
-    toggle.classList.toggle("open");
+    const isOpen = toggle.classList.toggle("open");
     navMenu.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
   });
 
   // Close mobile menu on link click
@@ -245,7 +284,26 @@
     link.addEventListener("click", () => {
       toggle.classList.remove("open");
       navMenu.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
     });
+  });
+
+  // Close mobile menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (navMenu.classList.contains("open") && !navbar.contains(e.target)) {
+      toggle.classList.remove("open");
+      navMenu.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Close mobile menu on Escape key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && navMenu.classList.contains("open")) {
+      toggle.classList.remove("open");
+      navMenu.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
   });
 
   // Back to top
@@ -322,7 +380,10 @@
 /* ──────────────────────────────────────────────────────────────
    8. COUNTER ANIMATION
 ────────────────────────────────────────────────────────────── */
+let countersAnimated = false;
 function initCounters() {
+  if (countersAnimated) return;
+  countersAnimated = true;
   const counters = document.querySelectorAll(".stat-number");
 
   counters.forEach(counter => {

@@ -16,70 +16,62 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="intro-active">
 
-  <!-- ═══════════════════ LOADING SCREEN ═══════════════════ -->
-  <div id="loading-screen">
-    <div class="loader-content">
-      <div class="loader-logo">PP</div>
-      <div class="loader-bar"><div class="loader-fill"></div></div>
-      <p class="loader-text">Initializing...</p>
-    </div>
+  <!-- ═══════════════════ INTRO VIDEO OVERLAY ═══════════════════ -->
+  <div id="intro-overlay" role="dialog" aria-modal="true" aria-label="Intro Video">
+    <!-- Vignette overlay -->
+    <div class="vid-vignette"></div>
+
+    <!-- Video (muted for autoplay; unmuted by user click) -->
+    <video id="intro-video" autoplay muted playsinline preload="auto" disablepictureinpicture disableremoteplayback>
+      <source src="intro.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Skip intro — cinematic bottom-right -->
+    <button class="vid-skip-btn" id="video-skip" aria-label="Skip intro">
+      <span>Skip Intro</span>
+      <i class="fa-solid fa-forward-step"></i>
+    </button>
   </div>
 
-  <!-- ═══════════════════ CURSOR GLOW ═══════════════════ -->
-  <div id="cursor-glow"></div>
-  <div id="cursor-dot"></div>
+  <!-- ═══════════════════ PORTFOLIO CONTENT ═══════════════════ -->
+  <main id="portfolio" aria-hidden="true">
 
-  <!-- ═══════════════════ PARTICLES ═══════════════════ -->
-  <canvas id="particles-canvas"></canvas>
+    <!-- ═══════════════════ CURSOR GLOW ═══════════════════ -->
+    <div id="cursor-glow"></div>
+    <div id="cursor-dot"></div>
 
-  <!-- ═══════════════════ NAVBAR ═══════════════════ -->
-  <nav id="navbar">
-    <div class="nav-container">
-      <a href="#home" class="nav-logo" id="nav-logo-link">
-        <span class="logo-text">PP</span>
-        <span class="logo-dot"></span>
-      </a>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
-        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
-        <li><a href="#skills" class="nav-link" data-section="skills">Skills</a></li>
-        <li><a href="#projects" class="nav-link" data-section="projects">Projects</a></li>
-        <li><a href="#experience" class="nav-link" data-section="experience">Experience</a></li>
-        <li><a href="#certifications" class="nav-link" data-section="certifications">Certifications</a></li>
-        <li><a href="#achievements" class="nav-link" data-section="achievements">Achievements</a></li>
-        <li><a href="#resume" class="nav-link" data-section="resume">Resume</a></li>
-        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
-      </ul>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+    <!-- ═══════════════════ PARTICLES ═══════════════════ -->
+    <canvas id="particles-canvas"></canvas>
 
-  <!-- ═══════════════════ HOME ═══════════════════ -->
-  <section id="home" class="section hero-section">
-    <!-- Video intro overlay -->
-    <div id="video-overlay">
-      <!-- Vignette overlay -->
-      <div class="vid-vignette"></div>
+    <!-- ═══════════════════ NAVBAR ═══════════════════ -->
+    <nav id="navbar">
+      <div class="nav-container">
+        <a href="#home" class="nav-logo" id="nav-logo-link">
+          <span class="logo-text">PP</span>
+          <span class="logo-dot"></span>
+        </a>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+          <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+          <li><a href="#skills" class="nav-link" data-section="skills">Skills</a></li>
+          <li><a href="#projects" class="nav-link" data-section="projects">Projects</a></li>
+          <li><a href="#experience" class="nav-link" data-section="experience">Experience</a></li>
+          <li><a href="#certifications" class="nav-link" data-section="certifications">Certifications</a></li>
+          <li><a href="#achievements" class="nav-link" data-section="achievements">Achievements</a></li>
+          <li><a href="#resume" class="nav-link" data-section="resume">Resume</a></li>
+          <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
 
-      <!-- Video (muted for autoplay; unmuted by user click) -->
-      <video id="intro-video" autoplay muted playsinline preload="auto" disablepictureinpicture disableremoteplayback>
-        <source src="intro.mp4" type="video/mp4" />
-      </video>
-
-
-
-      <!-- Skip intro — cinematic bottom-right -->
-      <button class="vid-skip-btn" id="video-skip" aria-label="Skip intro">
-        <span>Skip Intro</span>
-        <i class="fa-solid fa-forward-step"></i>
-      </button>
-    </div>
-
-    <div class="hero-content" id="hero-content">
+    <!-- ═══════════════════ HOME ═══════════════════ -->
+    <section id="home" class="section hero-section">
+      <div class="hero-content" id="hero-content">
       <div class="hero-greeting">
         <span class="greeting-line"><span class="greeting-dash"></span> Hello, World!</span>
       </div>
@@ -786,6 +778,8 @@
       <i class="fa-solid fa-chevron-up"></i>
     </button>
   </footer>
+
+  </main>
 
   <script src="script.js"></script>
 </body>
