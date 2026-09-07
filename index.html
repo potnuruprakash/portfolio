@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Potnuru Prakash – Computer Science Engineer, Cybersecurity Enthusiast, AI Developer, and IoT & Blockchain Learner. Explore my portfolio of projects, skills, and certifications." />
+  <meta name="keywords" content="Potnuru Prakash, portfolio, computer science, cybersecurity, AI developer, IoT, blockchain, software engineer" />
+  <meta name="author" content="Potnuru Prakash" />
+  <meta property="og:title" content="Potnuru Prakash | CS Engineer & Cybersecurity Enthusiast" />
+  <meta property="og:description" content="Premium portfolio of Potnuru Prakash – CS Engineer, AI Developer, Cybersecurity Enthusiast" />
+  <meta property="og:type" content="website" />
+  <title>Potnuru Prakash | CS Engineer & Cybersecurity Enthusiast</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════ LOADING SCREEN ═══════════════════ -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <div class="loader-logo">PP</div>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <p class="loader-text">Initializing...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ CURSOR GLOW ═══════════════════ -->
+  <div id="cursor-glow"></div>
+  <div id="cursor-dot"></div>
+
+  <!-- ═══════════════════ PARTICLES ═══════════════════ -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ═══════════════════ NAVBAR ═══════════════════ -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="nav-logo" id="nav-logo-link">
+        <span class="logo-text">PP</span>
+        <span class="logo-dot"></span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+        <li><a href="#skills" class="nav-link" data-section="skills">Skills</a></li>
+        <li><a href="#projects" class="nav-link" data-section="projects">Projects</a></li>
+        <li><a href="#experience" class="nav-link" data-section="experience">Experience</a></li>
+        <li><a href="#certifications" class="nav-link" data-section="certifications">Certifications</a></li>
+        <li><a href="#achievements" class="nav-link" data-section="achievements">Achievements</a></li>
+        <li><a href="#resume" class="nav-link" data-section="resume">Resume</a></li>
+        <li><a href="#contact" class="nav-link" data-section="contact">Contact</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════ HOME ═══════════════════ -->
+  <section id="home" class="section hero-section">
+    <!-- Video intro overlay -->
+    <div id="video-overlay">
+      <!-- Vignette overlay -->
+      <div class="vid-vignette"></div>
+
+      <!-- Video (muted for autoplay; unmuted by user click) -->
+      <video id="intro-video" autoplay muted playsinline preload="auto" disablepictureinpicture disableremoteplayback>
+        <source src="intro.mp4" type="video/mp4" />
+      </video>
+
+
+
+      <!-- Skip intro — cinematic bottom-right -->
+      <button class="vid-skip-btn" id="video-skip" aria-label="Skip intro">
+        <span>Skip Intro</span>
+        <i class="fa-solid fa-forward-step"></i>
+      </button>
+    </div>
+
+    <div class="hero-content" id="hero-content">
+      <div class="hero-greeting">
+        <span class="greeting-line"><span class="greeting-dash"></span> Hello, World!</span>
+      </div>
+      <h1 class="hero-title">
+        Hi, I'm<br />
+        <span class="name-gradient">Potnuru Prakash</span>
+      </h1>
+      <div class="hero-typing">
+        <span class="static-text">I'm a </span>
+        <span class="typing-text" id="typing-text"></span>
+        <span class="cursor-blink">|</span>
+      </div>
+      <p class="hero-subtitle">
+        Computer Science Engineer crafting secure, intelligent solutions at the intersection of
+        <span class="highlight">AI</span>, <span class="highlight">Cybersecurity</span>, and
+        <span class="highlight">IoT</span>.
+      </p>
+      <div class="hero-buttons">
+        <a href="#projects" class="btn btn-primary magnetic-btn" id="btn-projects">
+          <span>View Projects</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a href="resume.pdf" download class="btn btn-secondary magnetic-btn" id="btn-resume">
+          <span>Download Resume</span>
+          <i class="fa-solid fa-download"></i>
+        </a>
+        <a href="#contact" class="btn btn-ghost magnetic-btn" id="btn-contact">
+          <span>Contact Me</span>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number" data-target="10">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="5">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">Certifications</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="3">0</span><span class="stat-plus">+</span>
+          <span class="stat-label">Hackathons</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scroll-indicator">
+      <div class="scroll-mouse">
+        <div class="scroll-wheel"></div>
+      </div>
+      <span>Scroll Down</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ ABOUT ═══════════════════ -->
+  <section id="about" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Get to know me</span>
+        <h2 class="section-title">About <span class="text-glow">Me</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="about-grid">
+        <div class="about-photo-col reveal-left">
+          <div class="photo-wrapper">
+            <div class="photo-ring"></div>
+            <div class="photo-placeholder">
+              <i class="fa-solid fa-user"></i>
+              <p>Add your photo here</p>
+            </div>
+            <div class="photo-glow-ring"></div>
+          </div>
+          <div class="about-socials">
+            <a href="https://github.com/" target="_blank" class="social-icon-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a href="https://linkedin.com/" target="_blank" class="social-icon-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="mailto:prakash@email.com" class="social-icon-btn" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+          </div>
+        </div>
+        <div class="about-content-col reveal-right">
+          <h3 class="about-heading">CS Student building tomorrow's technology</h3>
+          <p class="about-text">
+            I'm a Computer Science Engineering student specializing in <span class="highlight">IoT</span>,
+            <span class="highlight">Cybersecurity</span>, and <span class="highlight">Blockchain Technology</span>.
+            I enjoy building secure software, AI-powered applications, and solving real-world problems
+            through technology.
+          </p>
+          <p class="about-text">
+            My journey spans from crafting intelligent self-healing infrastructure systems to competitive
+            multiplayer platforms. I'm driven by curiosity, fueled by coffee, and passionate about
+            making technology accessible and secure for everyone.
+          </p>
+          <div class="about-cards">
+            <div class="about-card glass-card">
+              <div class="about-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div>
+                <h4>Education</h4>
+                <p>B.Tech – Computer Science Engineering</p>
+                <span class="badge">2022 – 2026</span>
+              </div>
+            </div>
+            <div class="about-card glass-card">
+              <div class="about-card-icon"><i class="fa-solid fa-location-dot"></i></div>
+              <div>
+                <h4>Location</h4>
+                <p>Andhra Pradesh, India</p>
+                <span class="badge">Open to Remote</span>
+              </div>
+            </div>
+            <div class="about-card glass-card">
+              <div class="about-card-icon"><i class="fa-solid fa-fire"></i></div>
+              <div>
+                <h4>Interests</h4>
+                <p>AI, Cybersecurity, Blockchain, IoT</p>
+                <span class="badge">Always Learning</span>
+              </div>
+            </div>
+            <div class="about-card glass-card">
+              <div class="about-card-icon"><i class="fa-solid fa-rocket"></i></div>
+              <div>
+                <h4>Career Goal</h4>
+                <p>Software Engineer at top-tier Tech companies</p>
+                <span class="badge">MAANG & Beyond</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ SKILLS ═══════════════════ -->
+  <section id="skills" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">What I work with</span>
+        <h2 class="section-title">Technical <span class="text-glow">Skills</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="skills-grid">
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-code"></i></div>
+            <h3>Programming</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-brands fa-python"></i> Python</div>
+            <div class="skill-chip"><i class="fa-brands fa-java"></i> Java</div>
+            <div class="skill-chip"><i class="fa-solid fa-c"></i> C</div>
+            <div class="skill-chip"><i class="fa-brands fa-js"></i> JavaScript</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-layer-group"></i></div>
+            <h3>Frontend</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-brands fa-html5"></i> HTML</div>
+            <div class="skill-chip"><i class="fa-brands fa-css3-alt"></i> CSS</div>
+            <div class="skill-chip"><i class="fa-brands fa-react"></i> React</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-server"></i></div>
+            <h3>Backend</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-solid fa-bolt"></i> FastAPI</div>
+            <div class="skill-chip"><i class="fa-brands fa-python"></i> Django</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-database"></i></div>
+            <h3>Database</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-solid fa-database"></i> MySQL</div>
+            <div class="skill-chip"><i class="fa-solid fa-fire"></i> Firebase</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3>Cybersecurity</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-solid fa-network-wired"></i> Networking</div>
+            <div class="skill-chip"><i class="fa-brands fa-linux"></i> Linux</div>
+            <div class="skill-chip"><i class="fa-solid fa-user-secret"></i> Ethical Hacking</div>
+            <div class="skill-chip"><i class="fa-solid fa-magnifying-glass"></i> Digital Forensics</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-brands fa-aws"></i></div>
+            <h3>Cloud</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-brands fa-aws"></i> AWS</div>
+          </div>
+        </div>
+
+        <div class="skill-category glass-card reveal">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid fa-wrench"></i></div>
+            <h3>Tools & Platforms</h3>
+          </div>
+          <div class="skill-items">
+            <div class="skill-chip"><i class="fa-brands fa-git-alt"></i> Git</div>
+            <div class="skill-chip"><i class="fa-brands fa-github"></i> GitHub</div>
+            <div class="skill-chip"><i class="fa-solid fa-code"></i> VS Code</div>
+            <div class="skill-chip"><i class="fa-brands fa-android"></i> Android Studio</div>
+            <div class="skill-chip"><i class="fa-solid fa-mobile-screen"></i> Flutter</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ PROJECTS ═══════════════════ -->
+  <section id="projects" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">What I've built</span>
+        <h2 class="section-title">Featured <span class="text-glow">Projects</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="projects-grid">
+
+        <!-- Project 1 -->
+        <div class="project-card glass-card reveal">
+          <div class="project-number">01</div>
+          <div class="project-icon-wrap">
+            <i class="fa-solid fa-robot project-icon"></i>
+          </div>
+          <div class="project-content">
+            <h3 class="project-title">Self-Healing SRE Agent</h3>
+            <p class="project-desc">
+              AI-powered infrastructure monitoring system capable of detecting anomalies, performing
+              root cause analysis, and suggesting automated remediation actions in real-time.
+            </p>
+            <div class="project-tech">
+              <span class="tech-badge">Python</span>
+              <span class="tech-badge">FastAPI</span>
+              <span class="tech-badge">Streamlit</span>
+              <span class="tech-badge">WebSocket</span>
+            </div>
+          </div>
+          <div class="project-links">
+            <a href="#" class="btn-project" aria-label="Live Demo">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+            </a>
+            <a href="https://github.com/" target="_blank" class="btn-project btn-project-outline" aria-label="GitHub">
+              <i class="fa-brands fa-github"></i> GitHub
+            </a>
+          </div>
+          <div class="project-glow"></div>
+        </div>
+
+        <!-- Project 2 -->
+        <div class="project-card glass-card reveal">
+          <div class="project-number">02</div>
+          <div class="project-icon-wrap">
+            <i class="fa-solid fa-building-columns project-icon"></i>
+          </div>
+          <div class="project-content">
+            <h3 class="project-title">Campus Issue Portal</h3>
+            <p class="project-desc">
+              A web-based campus issue reporting and news management system with separate student
+              and admin portals for efficient campus management.
+            </p>
+            <div class="project-tech">
+              <span class="tech-badge">Django</span>
+              <span class="tech-badge">HTML</span>
+              <span class="tech-badge">CSS</span>
+              <span class="tech-badge">JavaScript</span>
+            </div>
+          </div>
+          <div class="project-links">
+            <a href="#" class="btn-project" aria-label="Live Demo">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+            </a>
+            <a href="https://github.com/" target="_blank" class="btn-project btn-project-outline" aria-label="GitHub">
+              <i class="fa-brands fa-github"></i> GitHub
+            </a>
+          </div>
+          <div class="project-glow"></div>
+        </div>
+
+        <!-- Project 3 -->
+        <div class="project-card glass-card reveal">
+          <div class="project-number">03</div>
+          <div class="project-icon-wrap">
+            <i class="fa-solid fa-cricket-bat-ball project-icon"></i>
+          </div>
+          <div class="project-content">
+            <h3 class="project-title">IPL Auction Arena</h3>
+            <p class="project-desc">
+              A multiplayer IPL auction platform where users create rooms, bid for players,
+              and build virtual teams in real-time with friends and cricket enthusiasts.
+            </p>
+            <div class="project-tech">
+              <span class="tech-badge">Flutter</span>
+              <span class="tech-badge">Firebase</span>
+            </div>
+          </div>
+          <div class="project-links">
+            <a href="#" class="btn-project" aria-label="Live Demo">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+            </a>
+            <a href="https://github.com/" target="_blank" class="btn-project btn-project-outline" aria-label="GitHub">
+              <i class="fa-brands fa-github"></i> GitHub
+            </a>
+          </div>
+          <div class="project-glow"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ EXPERIENCE ═══════════════════ -->
+  <section id="experience" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">My journey</span>
+        <h2 class="section-title">Experience &amp; <span class="text-glow">Education</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="timeline">
+
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content glass-card">
+            <div class="timeline-header">
+              <span class="timeline-badge">Education</span>
+              <span class="timeline-date">2022 – 2026</span>
+            </div>
+            <h3>B.Tech – Computer Science Engineering</h3>
+            <p class="timeline-org"><i class="fa-solid fa-university"></i> Specialization in IoT, Cybersecurity & Blockchain</p>
+            <p>Pursuing a comprehensive computer science degree with focus on emerging technologies, secure software development, and AI applications.</p>
+            <div class="timeline-tags">
+              <span class="tag">IoT</span><span class="tag">Cybersecurity</span><span class="tag">Blockchain</span><span class="tag">AI/ML</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            <div class="timeline-line"></div>
+          </div>
+          <div class="timeline-content glass-card">
+            <div class="timeline-header">
+              <span class="timeline-badge timeline-badge-blue">Project</span>
+              <span class="timeline-date">2024</span>
+            </div>
+            <h3>AI Infrastructure Monitoring</h3>
+            <p class="timeline-org"><i class="fa-solid fa-laptop-code"></i> Self-Directed Research & Development</p>
+            <p>Developed a Self-Healing SRE Agent using Python, FastAPI, and WebSocket technologies for real-time anomaly detection and automated remediation.</p>
+            <div class="timeline-tags">
+              <span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">AI/ML</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timeline-item reveal">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+          </div>
+          <div class="timeline-content glass-card">
+            <div class="timeline-header">
+              <span class="timeline-badge timeline-badge-purple">Development</span>
+              <span class="timeline-date">2023 – Present</span>
+            </div>
+            <h3>Full Stack & Mobile Development</h3>
+            <p class="timeline-org"><i class="fa-solid fa-code-branch"></i> Multiple Projects</p>
+            <p>Built multiple production-grade web and mobile applications including campus management systems and multiplayer gaming platforms using Django, Flutter, and Firebase.</p>
+            <div class="timeline-tags">
+              <span class="tag">Django</span><span class="tag">Flutter</span><span class="tag">Firebase</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CERTIFICATIONS ═══════════════════ -->
+  <section id="certifications" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Verified credentials</span>
+        <h2 class="section-title">Certifi<span class="text-glow">cations</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="certs-grid">
+
+        <div class="cert-card glass-card reveal">
+          <div class="cert-icon"><i class="fa-brands fa-aws"></i></div>
+          <div class="cert-content">
+            <span class="cert-issuer">Amazon Web Services</span>
+            <h3>AWS Academy Graduate</h3>
+            <p>Cloud Foundations & Architecture</p>
+            <div class="cert-footer">
+              <span class="cert-badge">AWS</span>
+              <a href="#" class="cert-verify">Verify <i class="fa-solid fa-external-link"></i></a>
+            </div>
+          </div>
+          <div class="cert-glow"></div>
+        </div>
+
+        <div class="cert-card glass-card reveal">
+          <div class="cert-icon"><i class="fa-brands fa-java"></i></div>
+          <div class="cert-content">
+            <span class="cert-issuer">Professional Certification</span>
+            <h3>Java Full Stack Developer</h3>
+            <p>Enterprise Java, Spring, REST APIs</p>
+            <div class="cert-footer">
+              <span class="cert-badge cert-badge-orange">Java</span>
+              <a href="#" class="cert-verify">Verify <i class="fa-solid fa-external-link"></i></a>
+            </div>
+          </div>
+          <div class="cert-glow"></div>
+        </div>
+
+        <div class="cert-card glass-card reveal">
+          <div class="cert-icon"><i class="fa-brands fa-python"></i></div>
+          <div class="cert-content">
+            <span class="cert-issuer">Professional Certification</span>
+            <h3>Python Full Stack Developer</h3>
+            <p>Django, FastAPI, REST, Data Science</p>
+            <div class="cert-footer">
+              <span class="cert-badge cert-badge-yellow">Python</span>
+              <a href="#" class="cert-verify">Verify <i class="fa-solid fa-external-link"></i></a>
+            </div>
+          </div>
+          <div class="cert-glow"></div>
+        </div>
+
+        <div class="cert-card glass-card reveal">
+          <div class="cert-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="cert-content">
+            <span class="cert-issuer">Cybersecurity Track</span>
+            <h3>Ethical Hacking & Forensics</h3>
+            <p>Penetration Testing, Digital Forensics, Network Security</p>
+            <div class="cert-footer">
+              <span class="cert-badge cert-badge-red">Security</span>
+              <a href="#" class="cert-verify">Verify <i class="fa-solid fa-external-link"></i></a>
+            </div>
+          </div>
+          <div class="cert-glow"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ ACHIEVEMENTS ═══════════════════ -->
+  <section id="achievements" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Milestones</span>
+        <h2 class="section-title">Achiev<span class="text-glow">ements</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="achievements-grid">
+
+        <div class="achievement-card glass-card reveal">
+          <div class="ach-icon-wrap">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div class="ach-number">3+</div>
+          <h3>Hackathons</h3>
+          <p>Competed in national-level hackathons, building real-world solutions under pressure. Finalist & participant in multiple competitions focused on AI and cybersecurity.</p>
+          <div class="ach-tags">
+            <span class="tag">National Level</span>
+            <span class="tag">AI Track</span>
+            <span class="tag">Security Track</span>
+          </div>
+        </div>
+
+        <div class="achievement-card glass-card reveal">
+          <div class="ach-icon-wrap">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <div class="ach-number">10+</div>
+          <h3>Workshops</h3>
+          <p>Attended and completed hands-on technical workshops on Cloud Computing, Machine Learning, Blockchain, and Ethical Hacking conducted by industry experts.</p>
+          <div class="ach-tags">
+            <span class="tag">Cloud</span>
+            <span class="tag">ML</span>
+            <span class="tag">Blockchain</span>
+          </div>
+        </div>
+
+        <div class="achievement-card glass-card reveal">
+          <div class="ach-icon-wrap">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div class="ach-number">15+</div>
+          <h3>Technical Events</h3>
+          <p>Participated in paper presentations, coding contests, quizzes, and project expos at inter-college technical fests. Won recognition for innovative solutions.</p>
+          <div class="ach-tags">
+            <span class="tag">Coding</span>
+            <span class="tag">Research</span>
+            <span class="tag">Innovation</span>
+          </div>
+        </div>
+
+        <div class="achievement-card glass-card reveal">
+          <div class="ach-icon-wrap">
+            <i class="fa-solid fa-users-gear"></i>
+          </div>
+          <div class="ach-number">2+</div>
+          <h3>Leadership Roles</h3>
+          <p>Led teams in collaborative project development and hackathon environments. Coordinated technical events and mentored peers in programming and cybersecurity concepts.</p>
+          <div class="ach-tags">
+            <span class="tag">Team Lead</span>
+            <span class="tag">Mentor</span>
+            <span class="tag">Coordinator</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ RESUME ═══════════════════ -->
+  <section id="resume" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">My credentials</span>
+        <h2 class="section-title">My <span class="text-glow">Resume</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="resume-wrapper reveal">
+        <div class="resume-preview glass-card">
+          <div class="resume-preview-header">
+            <div class="resume-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="resume-filename">Potnuru_Prakash_Resume.pdf</span>
+          </div>
+          <div class="resume-preview-body">
+            <div class="resume-placeholder">
+              <i class="fa-solid fa-file-pdf"></i>
+              <h3>Potnuru Prakash</h3>
+              <p>Computer Science Engineer | Cybersecurity Enthusiast | AI Developer</p>
+              <div class="resume-placeholder-lines">
+                <div class="rpl"></div><div class="rpl rpl-short"></div>
+                <div class="rpl"></div><div class="rpl rpl-medium"></div>
+                <div class="rpl"></div><div class="rpl rpl-short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="resume-actions">
+          <a href="resume.pdf" download class="btn btn-primary btn-large magnetic-btn" id="btn-download-resume">
+            <i class="fa-solid fa-download"></i>
+            <span>Download Resume</span>
+          </a>
+          <a href="resume.pdf" target="_blank" class="btn btn-secondary magnetic-btn" id="btn-view-resume">
+            <i class="fa-solid fa-eye"></i>
+            <span>View Full Resume</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ CONTACT ═══════════════════ -->
+  <section id="contact" class="section section-alt">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-tag">Let's talk</span>
+        <h2 class="section-title">Get In <span class="text-glow">Touch</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info reveal-left">
+          <h3>Let's build something great together</h3>
+          <p>I'm currently open to internships, freelance projects, and full-time opportunities. Whether you have a project idea or just want to say hi, feel free to reach out!</p>
+          <div class="contact-details">
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <span>Email</span>
+                <a href="mailto:prakashpotnuru7278@gmail.com">prakashpotnuru7278@gmail.com</a>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+              <div>
+                <span>Location</span>
+                <a href="#">Andhra Pradesh, India</a>
+              </div>
+            </div>
+            <div class="contact-item">
+              <div class="contact-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div>
+                <span>Status</span>
+                <a href="#">Available for opportunities</a>
+              </div>
+            </div>
+          </div>
+          <div class="contact-socials">
+            <a href="https://github.com/" target="_blank" class="social-icon-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a href="https://linkedin.com/" target="_blank" class="social-icon-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+            <a href="mailto:prakashpotnuru7278@gmail.com" class="social-icon-btn" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+            <a href="https://twitter.com/" target="_blank" class="social-icon-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          </div>
+        </div>
+        <div class="contact-form-col reveal-right">
+          <form id="contact-form" class="contact-form glass-card" novalidate>
+            <div class="form-group">
+              <label for="contact-name">Your Name</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-user input-icon"></i>
+                <input type="text" id="contact-name" name="name" placeholder="John Doe" required autocomplete="name" />
+              </div>
+              <span class="form-error" id="error-name"></span>
+            </div>
+            <div class="form-group">
+              <label for="contact-email">Email Address</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-envelope input-icon"></i>
+                <input type="email" id="contact-email" name="email" placeholder="john@example.com" required autocomplete="email" />
+              </div>
+              <span class="form-error" id="error-email"></span>
+            </div>
+            <div class="form-group">
+              <label for="contact-subject">Subject</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-tag input-icon"></i>
+                <input type="text" id="contact-subject" name="subject" placeholder="Project Inquiry" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="contact-message">Message</label>
+              <div class="input-wrapper textarea-wrapper">
+                <i class="fa-solid fa-message input-icon textarea-icon"></i>
+                <textarea id="contact-message" name="message" rows="5" placeholder="Tell me about your project or opportunity..." required></textarea>
+              </div>
+              <span class="form-error" id="error-message"></span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full magnetic-btn" id="submit-btn">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Send Message</span>
+            </button>
+            <div class="form-success" id="form-success">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Message sent! I'll get back to you soon.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <span class="logo-text">PP</span>
+          <span class="logo-dot"></span>
+        </div>
+        <p class="footer-tagline">Building the future, one line of code at a time.</p>
+        <div class="footer-socials">
+          <a href="https://github.com/" target="_blank" class="social-icon-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="https://linkedin.com/" target="_blank" class="social-icon-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="mailto:prakashpotnuru7278@gmail.com" class="social-icon-btn" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>
+        </div>
+      </div>
+      <div class="footer-nav">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer-bottom">
+        <p>Designed &amp; Developed by <span class="highlight">Potnuru Prakash</span> &copy; <span id="current-year"></span></p>
+        <p class="footer-love">Made with <i class="fa-solid fa-heart heart-icon"></i> and <i class="fa-solid fa-mug-hot"></i></p>
+      </div>
+    </div>
+    <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
