@@ -5,18 +5,23 @@
 "use strict";
 
 /* ──────────────────────────────────────────────────────────────
-   1. INTRO VIDEO & SCREEN LOCK CONTROLLER
-   - Strict viewport lock (mouse wheel, touch, keyboard)
+   1. LOADING SCREEN & INTRO VIDEO CONTROLLER
+   - Stage 1: Initializing loading screen ("PP" pulsating logo, progress bar, cycling messages)
+   - Stage 2: Intro video playback (fullscreen, cinematic vignette, skip button)
+   - Strict viewport scroll lock throughout both stages
    - Zero content leak from the portfolio underneath
-   - Seamless cinematic transition on video end or skip
+   - Seamless transition when video ends or skip is clicked
 ────────────────────────────────────────────────────────────── */
-(function initIntro() {
-  const overlay   = document.getElementById("intro-overlay") || document.getElementById("video-overlay");
-  const video     = document.getElementById("intro-video");
-  const skip      = document.getElementById("video-skip");
-  const portfolio = document.getElementById("portfolio");
+(function initIntroFlow() {
+  const loader     = document.getElementById("loading-screen");
+  const loaderText = loader ? loader.querySelector(".loader-text") : null;
+  const overlay    = document.getElementById("intro-overlay") || document.getElementById("video-overlay");
+  const video      = document.getElementById("intro-video");
+  const skip       = document.getElementById("video-skip");
+  const portfolio  = document.getElementById("portfolio");
 
   let isIntroActive = true;
+  let introFinished = false;
 
   // ── Immediate screen & scroll lock
   document.documentElement.classList.add("intro-active");
@@ -50,12 +55,81 @@
   window.addEventListener("touchmove", preventScroll, { passive: false });
   window.addEventListener("keydown", preventScrollKeys, { passive: false });
 
+  // ── Stage 1: Cycling loading screen messages
+  const loaderMessages = [
+    "Initializing...",
+    "Loading assets...",
+    "Compiling portfolio...",
+    "Almost ready..."
+  ];
+  let msgIdx = 0;
+  let msgInterval = null;
+
+  if (loaderText) {
+    msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % loaderMessages.length;
+      loaderText.textContent = loaderMessages[msgIdx];
+    }, 450);
+  }
+
+  // ── Stage 2: Start Video after loader finishes
+  let videoStarted = false;
+  function startVideo() {
+    if (videoStarted || introFinished) return;
+    videoStarted = true;
+
+    if (msgInterval) {
+      clearInterval(msgInterval);
+      msgInterval = null;
+    }
+
+    // Fade out loading screen
+    if (loader) {
+      loader.classList.add("fade-out");
+      setTimeout(() => {
+        loader.classList.add("hidden");
+        loader.style.display = "none";
+      }, 600);
+    }
+
+    // Start video playback
+    if (video) {
+      video.currentTime = 0;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.warn("Autoplay policy or playback error:", err);
+          // If video cannot autoplay, wait briefly then transition
+          setTimeout(finishIntro, 1200);
+        });
+      }
+    } else {
+      finishIntro();
+    }
+  }
+
+  // Run loader for ~1.9 seconds matching the CSS loader-progress bar
+  const loaderTimer = setTimeout(() => {
+    startVideo();
+  }, 1900);
+
   // ── Finish intro transition
-  let introFinished = false;
   function finishIntro() {
     if (introFinished) return;
     introFinished = true;
     isIntroActive = false;
+
+    clearTimeout(loaderTimer);
+    if (msgInterval) {
+      clearInterval(msgInterval);
+      msgInterval = null;
+    }
+
+    // Hide loader immediately if still showing
+    if (loader) {
+      loader.classList.add("fade-out", "hidden");
+      loader.style.display = "none";
+    }
 
     // Pause video
     if (video) {
@@ -103,15 +177,6 @@
       console.warn("Intro video error — transitioning to portfolio");
       setTimeout(finishIntro, 500);
     });
-
-    // Ensure autoplay works
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        // Autoplay policy prevented playback; wait briefly then transition
-        setTimeout(finishIntro, 1200);
-      });
-    }
   }
 
   // ── Skip button
