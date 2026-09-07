@@ -878,6 +878,24 @@ body.intro-active #portfolio {
   border: 2px dashed rgba(0,191,255,0.3);
   animation: spin-slow 20s linear infinite;
 }
+.photo-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  position: relative;
+  z-index: 1;
+  border: 2px solid var(--blue-border);
+  box-shadow: 0 0 40px rgba(0, 191, 255, 0.25), 0 0 80px rgba(0, 191, 255, 0.1);
+  transition: transform 0.4s var(--transition), box-shadow 0.4s var(--transition), border-color 0.4s var(--transition);
+}
+.photo-wrapper:hover .photo-img {
+  transform: scale(1.03);
+  border-color: var(--cyan);
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.45), 0 0 90px rgba(0, 191, 255, 0.2);
+}
 .photo-placeholder {
   width: 100%;
   height: 100%;
