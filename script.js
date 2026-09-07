@@ -495,25 +495,32 @@ function initCounters() {
    10. CONTACT FORM
 ────────────────────────────────────────────────────────────── */
 (function initContactForm() {
-  const form    = document.getElementById("contact-form");
-  const success = document.getElementById("form-success");
+  const form        = document.getElementById("contact-form");
+  const success     = document.getElementById("form-success");
+  const errorBanner = document.getElementById("form-error-banner");
+  const errorText   = document.getElementById("form-error-text");
   if (!form) return;
 
   function showError(id, msg) {
-    document.getElementById(id).textContent = msg;
+    const el = document.getElementById(id);
+    if (el) el.textContent = msg;
   }
   function clearErrors() {
     ["error-name", "error-email", "error-message"].forEach(id => {
-      document.getElementById(id).textContent = "";
+      const el = document.getElementById(id);
+      if (el) el.textContent = "";
     });
+    if (errorBanner) errorBanner.classList.remove("show");
   }
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearErrors();
+    if (success) success.classList.remove("show");
 
     const name    = form.querySelector("#contact-name").value.trim();
     const email   = form.querySelector("#contact-email").value.trim();
+    const subject = form.querySelector("#contact-subject") ? form.querySelector("#contact-subject").value.trim() : "";
     const message = form.querySelector("#contact-message").value.trim();
     let valid = true;
 
@@ -525,17 +532,51 @@ function initCounters() {
     if (!valid) return;
 
     const btn = document.getElementById("submit-btn");
+    const originalBtnHtml = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Sending...</span>';
     btn.disabled = true;
 
-    // Simulate send
-    setTimeout(() => {
-      form.reset();
-      success.classList.add("show");
-      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span>Send Message</span>';
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/prakashpotnuru7278@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          _subject: subject ? `Portfolio Inquiry: ${subject}` : `New Portfolio Message from ${name}`,
+          message: message,
+          _captcha: "false",
+          _template: "table"
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && (data.success === "true" || data.success === true)) {
+        form.reset();
+        if (success) {
+          success.classList.add("show");
+          setTimeout(() => success.classList.remove("show"), 6000);
+        }
+      } else {
+        throw new Error(data.message || "Failed to deliver message. Please try again.");
+      }
+    } catch (err) {
+      console.error("Form submission error:", err);
+      if (errorBanner) {
+        if (errorText) {
+          errorText.textContent = err.message || "Something went wrong. Please try emailing directly at prakashpotnuru7278@gmail.com";
+        }
+        errorBanner.classList.add("show");
+        setTimeout(() => errorBanner.classList.remove("show"), 7000);
+      }
+    } finally {
+      btn.innerHTML = originalBtnHtml;
       btn.disabled = false;
-      setTimeout(() => success.classList.remove("show"), 5000);
-    }, 1800);
+    }
   });
 })();
 

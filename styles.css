@@ -1709,6 +1709,20 @@ body.intro-active #portfolio {
   font-weight: 500;
 }
 .form-success.show { display: flex; }
+.form-error-banner {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 10px;
+  color: #ff6b6b;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+.form-error-banner.show { display: flex; }
 
 /* ══════════════════════════════════════════════════════════════
    FOOTER
