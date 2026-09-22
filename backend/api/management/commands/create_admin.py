@@ -1,76 +1,170 @@
 """
-Management command to create a secure Django admin user interactively.
+Management command to create or update a secure Django admin user.
+
+Supports both:
+- Interactive local usage
+- Automated Render deployment using command-line arguments
 """
+
 import getpass
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
+
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Interactively create a secure admin user for portfolio management."
+    help = "Create or update a secure admin user for portfolio management."
 
     def add_arguments(self, parser):
-        parser.add_argument('--username', type=str, help='Admin username (optional, for automation)')
-        parser.add_argument('--email', type=str, help='Admin email (optional, for automation)')
-        parser.add_argument('--password', type=str, help='Admin password (optional, for automation)')
+        parser.add_argument(
+            "--username",
+            type=str,
+            help="Admin username",
+        )
+
+        parser.add_argument(
+            "--email",
+            type=str,
+            help="Admin email",
+        )
+
+        parser.add_argument(
+            "--password",
+            type=str,
+            help="Admin password",
+        )
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE("=== Create Portfolio CMS Admin User ==="))
+        self.stdout.write(
+            self.style.NOTICE(
+                "=== Portfolio CMS Admin Setup ==="
+            )
+        )
 
-        username = options.get('username')
-        email = options.get('email')
-        password = options.get('password')
+        username = options.get("username")
+        email = options.get("email")
+        password = options.get("password")
 
-        # Interactive prompts if arguments not supplied
+        # ============================================================
+        # USERNAME
+        # ============================================================
+
         if not username:
             while True:
                 username = input("Username: ").strip()
+
                 if not username:
-                    self.stdout.write(self.style.ERROR("Username cannot be empty."))
+                    self.stdout.write(
+                        self.style.ERROR(
+                            "Username cannot be empty."
+                        )
+                    )
                     continue
-                if User.objects.filter(username=username).exists():
-                    self.stdout.write(self.style.ERROR(f"User '{username}' already exists. Choose another username."))
-                    continue
+
                 break
-        elif User.objects.filter(username=username).exists():
-            raise CommandError(f"User '{username}' already exists.")
+
+        # ============================================================
+        # EMAIL
+        # ============================================================
 
         if not email:
             email = input("Email: ").strip()
 
+        # ============================================================
+        # PASSWORD
+        # ============================================================
+
         if not password:
             while True:
-                p1 = getpass.getpass("Password: ")
-                if not p1:
-                    self.stdout.write(self.style.ERROR("Password cannot be empty."))
+                password_1 = getpass.getpass("Password: ")
+
+                if not password_1:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            "Password cannot be empty."
+                        )
+                    )
                     continue
-                p2 = getpass.getpass("Confirm password: ")
-                if p1 != p2:
-                    self.stdout.write(self.style.ERROR("Passwords do not match. Try again."))
+
+                password_2 = getpass.getpass(
+                    "Confirm password: "
+                )
+
+                if password_1 != password_2:
+                    self.stdout.write(
+                        self.style.ERROR(
+                            "Passwords do not match. Try again."
+                        )
+                    )
                     continue
-                try:
-                    validate_password(p1)
-                except ValidationError as ve:
-                    for err in ve.messages:
-                        self.stdout.write(self.style.ERROR(f"  * {err}"))
-                    continue
-                password = p1
+
+                password = password_1
                 break
+
+        # ============================================================
+        # PASSWORD VALIDATION
+        # ============================================================
+
+        try:
+            validate_password(password)
+        except ValidationError as error:
+            raise CommandError(
+                "Password validation failed: "
+                + ", ".join(error.messages)
+            )
+
+        # ============================================================
+        # FIND EXISTING USER
+        # ============================================================
+
+        user = User.objects.filter(
+            username=username
+        ).first()
+
+        # ============================================================
+        # CREATE USER
+        # ============================================================
+
+        if user is None:
+            user = User.objects.create_superuser(
+                username=username,
+                email=email,
+                password=password,
+            )
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Admin user '{username}' created successfully."
+                )
+            )
+
+        # ============================================================
+        # UPDATE EXISTING USER
+        # ============================================================
+
         else:
-            try:
-                validate_password(password)
-            except ValidationError as ve:
-                raise CommandError(f"Password validation failed: {', '.join(ve.messages)}")
+            user.email = email
+            user.set_password(password)
 
-        user = User.objects.create_superuser(
-            username=username,
-            email=email,
-            password=password
+            user.is_active = True
+            user.is_staff = True
+            user.is_superuser = True
+
+            user.save()
+
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Admin user '{username}' updated successfully."
+                )
+            )
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Admin authentication is ready."
+            )
         )
-
-        self.stdout.write(self.style.SUCCESS(f"\nAdmin user '{user.username}' created successfully!"))
-        self.stdout.write(self.style.SUCCESS("You can now log in at /manage/login/"))
