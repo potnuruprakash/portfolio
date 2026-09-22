@@ -79,7 +79,11 @@ class PublicProfileView(APIView):
         doc = mongo_manager.profiles.find_one({"isDeleted": {"$ne": True}, "published": {"$ne": False}})
         if not doc:
             doc = mongo_manager.profiles.find_one({"isDeleted": {"$ne": True}})
-        return Response({"success": True, "data": serialize_doc(doc) or {}})
+        data = serialize_doc(doc) or {}
+        # Ensure profileImage fallback is always present if missing or empty
+        if not data.get('profileImage'):
+            data['profileImage'] = '/profile.png'
+        return Response({"success": True, "data": data})
 
 
 class PublicEducationView(APIView):
@@ -280,6 +284,9 @@ class AdminProfileView(APIView):
 
         existing = mongo_manager.profiles.find_one({"slug": data['slug']})
         if existing:
+            # Preserve existing profileImage if not explicitly supplied or empty in update
+            if not data.get('profileImage') and existing.get('profileImage'):
+                data['profileImage'] = existing['profileImage']
             mongo_manager.profiles.update_one({"_id": existing['_id']}, {"$set": data})
             doc_id = str(existing['_id'])
             action = "UPDATE"
@@ -294,6 +301,26 @@ class AdminProfileView(APIView):
 
     def put(self, request):
         return self.post(request)
+
+    def patch(self, request):
+        existing = mongo_manager.profiles.find_one({"isDeleted": {"$ne": True}})
+        if not existing:
+            existing = mongo_manager.profiles.find_one()
+        if not existing:
+            return Response({"success": False, "error": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        updates = {}
+        if 'profileImage' in request.data:
+            updates['profileImage'] = str(request.data['profileImage']).strip()
+
+        if not updates:
+            return Response({"success": False, "error": "No valid fields provided for update."}, status=status.HTTP_400_BAD_REQUEST)
+
+        updates['updatedAt'] = datetime.utcnow().isoformat() + "Z"
+        mongo_manager.profiles.update_one({"_id": existing['_id']}, {"$set": updates})
+        log_audit_event("UPDATE", "profiles", str(existing['_id']), changes=updates, request=request)
+        doc = mongo_manager.profiles.find_one({"_id": existing['_id']})
+        return Response({"success": True, "data": serialize_doc(doc)})
 
 
 class GenericAdminCollectionListView(APIView):

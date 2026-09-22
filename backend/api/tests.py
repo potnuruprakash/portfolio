@@ -230,6 +230,34 @@ class FileUploadTests(TestCase):
         self.assertIn('.pdf', data.get('storedName', ''))
         self.assertTrue(data.get('url', '').startswith('/media/'))
 
+    def test_valid_photo_upload_and_patch_profile(self):
+        png_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
+        photo_file = SimpleUploadedFile("avatar.png", png_content, content_type="image/png")
+        upload_res = self.client.post(reverse('api:admin-file-upload'), {'file': photo_file, 'folder': 'profile'})
+        self.assertEqual(upload_res.status_code, 201)
+        photo_url = upload_res.json()['data']['url']
+        self.assertTrue(photo_url.startswith('/media/profile/'))
+
+        # PATCH /api/admin/profile/ to set profileImage
+        patch_res = self.client.patch(
+            reverse('api:admin-profile'),
+            data={'profileImage': photo_url},
+            content_type='application/json'
+        )
+        self.assertEqual(patch_res.status_code, 200)
+        self.assertEqual(patch_res.json()['data']['profileImage'], photo_url)
+
+        # GET /api/profile/ public check
+        pub_res = self.client.get(reverse('api:public-profile'))
+        self.assertEqual(pub_res.status_code, 200)
+        self.assertEqual(pub_res.json()['data']['profileImage'], photo_url)
+
+    def test_upload_reject_text_extension(self):
+        txt_file = SimpleUploadedFile("readme.txt", b"plain text", content_type="text/plain")
+        res = self.client.post(reverse('api:admin-file-upload'), {'file': txt_file})
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.json().get('success'))
+
 
 class PublicPortfolioHomepageTest(TestCase):
     def test_root_serves_portfolio_html(self):

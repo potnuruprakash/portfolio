@@ -34,9 +34,12 @@ urlpatterns = [
         serve,
         {'document_root': frontend_dir}
     ),
+
+    # ── Media Uploads Directory (uploads, photos, certificates) ──
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
 
-# Serve media files in development and production fallback
+# Static & Media fallbacks
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
 

@@ -718,9 +718,14 @@ document.getElementById("nav-logo-link")?.addEventListener("click", (e) => {
           if (existingPs[idx]) existingPs[idx].textContent = text;
         });
       }
-    }
     if (p.profileImage) {
-      document.querySelectorAll(".photo-img").forEach(img => img.src = p.profileImage);
+      document.querySelectorAll(".photo-img").forEach(img => {
+        img.src = p.profileImage;
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = "profile.png";
+        };
+      });
     }
   });
 

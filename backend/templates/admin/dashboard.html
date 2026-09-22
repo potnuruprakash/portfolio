@@ -655,6 +655,40 @@
           <button class="btn-action" onclick="saveProfile()"><i class="fa-solid fa-check"></i> Save Changes</button>
         </div>
 
+        <!-- ════ Profile Photo Section ════ -->
+        <div class="glass-panel" style="margin-bottom: 24px;">
+          <h3 style="font-family: 'Poppins', sans-serif; font-size: 16px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-camera" style="color: var(--primary);"></i> Profile Photo
+          </h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+            Update your public hero photo (PNG, JPG, JPEG, WEBP, max 15 MB).
+          </p>
+          <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+            <div style="position: relative; width: 130px; height: 130px; flex-shrink: 0;">
+              <img id="profile-photo-preview" src="/profile.png" alt="Profile Preview"
+                   style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); box-shadow: 0 0 20px rgba(0, 191, 255, 0.25); background: #0b0f19;"
+                   onerror="this.onerror=null; this.src='/profile.png';" />
+              <div id="photo-upload-spinner" style="display: none; position: absolute; inset: 0; border-radius: 50%; background: rgba(7, 9, 14, 0.75); align-items: center; justify-content: center; color: var(--secondary); font-size: 24px;">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 250px;">
+              <input type="file" id="profile-photo-input" accept=".png,.jpg,.jpeg,.webp" style="display: none;" onchange="handlePhotoSelection(this)" />
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('profile-photo-input').click()">
+                  <i class="fa-solid fa-image"></i> Choose Photo
+                </button>
+                <button type="button" class="btn-action" id="btn-upload-photo" onclick="uploadProfilePhoto()" disabled style="opacity: 0.6; cursor: not-allowed;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo
+                </button>
+              </div>
+              <div id="photo-file-status" style="font-size: 12.5px; color: var(--text-muted);">
+                <i class="fa-solid fa-circle-info" style="color: var(--secondary);"></i> Select an image to preview before uploading.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="glass-panel">
           <form id="profile-form">
             <div class="form-grid">
@@ -1137,7 +1171,10 @@
       }
     }
 
-    // ── PROFILE ──
+    // ── PROFILE & PHOTO MANAGEMENT ──
+    let currentProfilePhotoUrl = '/profile.png';
+    let selectedPhotoFile = null;
+
     async function loadProfile() {
       try {
         const res = await apiRequest('/api/admin/profile/');
@@ -1152,9 +1189,111 @@
           document.getElementById('prof-email').value = d.email || '';
           document.getElementById('prof-availability').value = d.availability || '';
           document.getElementById('prof-careerGoal').value = d.careerGoal || '';
+
+          if (d.profileImage) {
+            currentProfilePhotoUrl = d.profileImage;
+            document.getElementById('profile-photo-preview').src = d.profileImage;
+          } else {
+            currentProfilePhotoUrl = '/profile.png';
+            document.getElementById('profile-photo-preview').src = '/profile.png';
+          }
         }
       } catch (e) {
         showToast("Error loading profile", "error");
+      }
+    }
+
+    function handlePhotoSelection(input) {
+      if (!input.files || !input.files.length) return;
+      const file = input.files[0];
+      const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      const allowedExts = ['.png', '.jpg', '.jpeg', '.webp'];
+      const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+      if (!allowed.includes(file.type) && !allowedExts.includes(fileExt)) {
+        showToast("Invalid format. Please select PNG, JPG, JPEG, or WEBP.", "error");
+        input.value = '';
+        return;
+      }
+
+      if (file.size > 15 * 1024 * 1024) {
+        showToast("File size exceeds 15 MB limit.", "error");
+        input.value = '';
+        return;
+      }
+
+      selectedPhotoFile = file;
+
+      // Immediate image preview before upload
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('profile-photo-preview').src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      const btnUpload = document.getElementById('btn-upload-photo');
+      btnUpload.disabled = false;
+      btnUpload.style.opacity = '1';
+      btnUpload.style.cursor = 'pointer';
+
+      const statusEl = document.getElementById('photo-file-status');
+      statusEl.innerHTML = `<i class="fa-solid fa-file-image" style="color: var(--secondary);"></i> Ready to upload: <strong>${file.name}</strong> (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+    }
+
+    async function uploadProfilePhoto() {
+      if (!selectedPhotoFile) {
+        showToast("Please choose a photo first.", "error");
+        return;
+      }
+
+      const btnUpload = document.getElementById('btn-upload-photo');
+      const spinner = document.getElementById('photo-upload-spinner');
+      const statusEl = document.getElementById('photo-file-status');
+
+      btnUpload.disabled = true;
+      btnUpload.style.opacity = '0.6';
+      btnUpload.style.cursor = 'not-allowed';
+      btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+      spinner.style.display = 'flex';
+      statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color: var(--primary);"></i> Uploading photo to server...';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedPhotoFile);
+        formData.append('folder', 'profile');
+
+        const uploadRes = await apiRequest('/api/admin/files/upload/', 'POST', formData);
+        if (!uploadRes.success) {
+          throw new Error(uploadRes.error || "Upload failed");
+        }
+
+        const uploadedUrl = uploadRes.data.url;
+
+        // Save returned file URL to MongoDB profile document via PATCH
+        statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color: var(--primary);"></i> Saving to profile...';
+        const saveRes = await apiRequest('/api/admin/profile/', 'PATCH', { profileImage: uploadedUrl });
+        if (!saveRes.success) {
+          throw new Error(saveRes.error || "Failed to link photo to profile");
+        }
+
+        currentProfilePhotoUrl = uploadedUrl;
+        document.getElementById('profile-photo-preview').src = uploadedUrl;
+        showToast("Profile photo uploaded and updated successfully!");
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #73d13d;"></i> Profile photo active on portfolio.';
+        selectedPhotoFile = null;
+        document.getElementById('profile-photo-input').value = '';
+      } catch (err) {
+        showToast("Error uploading photo: " + err.message, "error");
+        statusEl.innerHTML = '<i class="fa-solid fa-circle-exclamation" style="color: #ff7875;"></i> Upload failed. Try again.';
+        document.getElementById('profile-photo-preview').src = currentProfilePhotoUrl;
+      } finally {
+        spinner.style.display = 'none';
+        btnUpload.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload Photo';
+        if (!selectedPhotoFile) {
+          btnUpload.disabled = true;
+          btnUpload.style.opacity = '0.6';
+          btnUpload.style.cursor = 'not-allowed';
+        }
       }
     }
 
@@ -1167,6 +1306,7 @@
         about: document.getElementById('prof-about').value.trim(),
         location: document.getElementById('prof-location').value.trim(),
         email: document.getElementById('prof-email').value.trim(),
+        profileImage: currentProfilePhotoUrl,
         availability: document.getElementById('prof-availability').value.trim(),
         careerGoal: document.getElementById('prof-careerGoal').value.trim(),
         published: true
