@@ -1,9 +1,9 @@
 """
 Management command to create or update a secure Django admin user.
 
-Supports both:
+Supports:
 - Interactive local usage
-- Automated Render deployment using command-line arguments
+- Non-interactive Render/production deployment
 """
 
 import getpass
@@ -55,25 +55,22 @@ class Command(BaseCommand):
         # ============================================================
 
         if not username:
-            while True:
-                username = input("Username: ").strip()
+            username = input("Username: ").strip()
 
-                if not username:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            "Username cannot be empty."
-                        )
-                    )
-                    continue
+            if not username:
+                raise CommandError("Username cannot be empty.")
 
-                break
+        username = username.strip()
 
         # ============================================================
         # EMAIL
         # ============================================================
 
         if not email:
+            # Only ask interactively when running locally
             email = input("Email: ").strip()
+
+        email = email.strip()
 
         # ============================================================
         # PASSWORD
@@ -131,6 +128,7 @@ class Command(BaseCommand):
         # ============================================================
 
         if user is None:
+
             user = User.objects.create_superuser(
                 username=username,
                 email=email,
@@ -148,6 +146,7 @@ class Command(BaseCommand):
         # ============================================================
 
         else:
+
             user.email = email
             user.set_password(password)
 
