@@ -1,0 +1,37 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Uploads & Backups
+media/
+backend/media/
+backups/
+backend/backups/
+
+# Logs
+*.log
+
+# Database
+*.sqlite3
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Operating System
+.DS_Store
+Thumbs.db

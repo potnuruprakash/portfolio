@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio CMS — Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --card-bg: rgba(14, 18, 28, 0.75);
+      --card-border: rgba(0, 191, 255, 0.2);
+      --primary: #00bfff;
+      --secondary: #00e5ff;
+      --text: #f0f4f8;
+      --text-muted: #8a99ad;
+      --danger: #ff4d4f;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Glow circles */
+    .bg-glow {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .bg-glow-1 { top: -100px; left: -100px; }
+    .bg-glow-2 { bottom: -100px; right: -100px; }
+
+    .login-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 191, 255, 0.1);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(0, 229, 255, 0.05));
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+      color: var(--secondary);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+    }
+    .login-header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .login-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrapper i.prefix-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 13px 42px 13px 40px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--primary);
+      background: rgba(0, 191, 255, 0.04);
+      box-shadow: 0 0 12px rgba(0, 191, 255, 0.25);
+    }
+    .toggle-pass {
+      position: absolute;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 0;
+    }
+    .toggle-pass:hover {
+      color: var(--text);
+    }
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #07090e;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      margin-top: 10px;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 191, 255, 0.4);
+    }
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error-alert {
+      background: rgba(255, 77, 79, 0.12);
+      border: 1px solid rgba(255, 77, 79, 0.3);
+      color: #ff7875;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+    .back-home:hover {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo-badge">PP</div>
+      <h1>Portfolio CMS</h1>
+      <p>Secure administrative access</p>
+    </div>
+
+    {% if error %}
+    <div class="error-alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/manage/login/" id="login-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.GET.next|default:'/manage/' }}" />
+
+      <div class="form-group">
+        <label for="username">Username / Email</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-user prefix-icon"></i>
+          <input type="text" id="username" name="username" placeholder="Enter admin username" required autofocus autocomplete="username" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-lock prefix-icon"></i>
+          <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password" />
+          <button type="button" class="toggle-pass" id="toggle-pass" aria-label="Toggle password visibility">
+            <i class="fa-regular fa-eye" id="eye-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">
+        <span id="btn-text">Sign In</span>
+        <i class="fa-solid fa-arrow-right" id="btn-icon"></i>
+      </button>
+    </form>
+
+    <a href="/" class="back-home">
+      <i class="fa-solid fa-arrow-left"></i> Return to Public Portfolio
+    </a>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggle-pass');
+    const passInput = document.getElementById('password');
+    const eyeIcon   = document.getElementById('eye-icon');
+
+    toggleBtn.addEventListener('click', () => {
+      const isPass = passInput.type === 'password';
+      passInput.type = isPass ? 'text' : 'password';
+      eyeIcon.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    });
+
+    const form = document.getElementById('login-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
+
+    form.addEventListener('submit', () => {
+      submitBtn.disabled = true;
+      btnText.textContent = 'Authenticating...';
+      btnIcon.className = 'fa-solid fa-spinner fa-spin';
+    });
+  </script>
+</body>
+</html>
