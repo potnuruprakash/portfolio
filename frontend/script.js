@@ -677,3 +677,192 @@ document.getElementById("nav-logo-link")?.addEventListener("click", (e) => {
     });
   });
 })();
+
+/* ──────────────────────────────────────────────────────────────
+   17. DYNAMIC CMS PORTFOLIO INTEGRATION (Phase 5)
+   - Loads dynamic content from /api/* endpoints
+   - Never destroys fallback content if an API is unavailable
+   - Preserves all animations, magnetic buttons, and intro video
+────────────────────────────────────────────────────────────── */
+(async function loadDynamicPortfolioContent() {
+  const API_BASE = "/api";
+
+  async function safeFetch(endpoint) {
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`);
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json && json.success ? json : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 1. Profile
+  safeFetch("/profile/").then(res => {
+    if (!res || !res.data) return;
+    const p = res.data;
+    if (p.fullName) {
+      document.querySelectorAll(".name-gradient").forEach(el => el.textContent = p.fullName);
+    }
+    if (p.shortIntroduction) {
+      const sub = document.querySelector(".hero-subtitle");
+      if (sub && p.shortIntroduction.trim()) sub.textContent = p.shortIntroduction;
+    }
+    if (p.about) {
+      const aboutCol = document.querySelector(".about-content-col");
+      if (aboutCol) {
+        const paragraphs = p.about.split("\n\n").filter(Boolean);
+        const existingPs = aboutCol.querySelectorAll(".about-text");
+        paragraphs.forEach((text, idx) => {
+          if (existingPs[idx]) existingPs[idx].textContent = text;
+        });
+      }
+    }
+    if (p.profileImage) {
+      document.querySelectorAll(".photo-img").forEach(img => img.src = p.profileImage);
+    }
+  });
+
+  // 2. Stats
+  safeFetch("/stats/").then(res => {
+    if (!res || !res.data) return;
+    const s = res.data;
+    const statsContainer = document.querySelector(".hero-stats");
+    if (!statsContainer) return;
+
+    const items = statsContainer.querySelectorAll(".stat-item");
+    if (items[0] && s.projects !== undefined) {
+      const num = items[0].querySelector(".stat-number");
+      if (num) { num.dataset.target = s.projects; num.textContent = s.projects; }
+    }
+    if (items[1] && s.certifications !== undefined) {
+      const num = items[1].querySelector(".stat-number");
+      if (num) { num.dataset.target = s.certifications; num.textContent = s.certifications; }
+    }
+    if (items[2] && s.hackathons !== undefined) {
+      const num = items[2].querySelector(".stat-number");
+      if (num) { num.dataset.target = s.hackathons; num.textContent = s.hackathons; }
+    }
+  });
+
+  // 3. Featured Projects
+  safeFetch("/projects/?featured=true").then(res => {
+    if (!res || !res.data || !res.data.length) return;
+    const grid = document.querySelector(".projects-grid");
+    if (!grid) return;
+
+    grid.innerHTML = res.data.map((proj, idx) => {
+      const num = String(idx + 1).padStart(2, "0");
+      const techBadges = (proj.techStack || []).map(t => `<span class="tech-badge">${t}</span>`).join("");
+      const ghLink = proj.githubUrl ? `<a href="${proj.githubUrl}" target="_blank" class="btn-project btn-project-outline" aria-label="GitHub"><i class="fa-brands fa-github"></i> GitHub</a>` : "";
+      const demoLink = proj.liveUrl && proj.liveUrl !== "#" ? `<a href="${proj.liveUrl}" target="_blank" class="btn-project" aria-label="Live Demo"><i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo</a>` : "";
+
+      return `
+        <div class="project-card glass-card reveal visible">
+          <div class="project-number">${num}</div>
+          <div class="project-icon-wrap">
+            <i class="fa-solid fa-layer-group project-icon"></i>
+          </div>
+          <div class="project-content">
+            <h3 class="project-title">${proj.title}</h3>
+            <p class="project-desc">${proj.shortDescription}</p>
+            <div class="project-tech">${techBadges}</div>
+          </div>
+          <div class="project-links">
+            ${demoLink}
+            ${ghLink}
+          </div>
+          <div class="project-glow"></div>
+        </div>
+      `;
+    }).join("");
+  });
+
+  // 4. Skills
+  safeFetch("/skills/").then(res => {
+    if (!res || !res.grouped || !Object.keys(res.grouped).length) return;
+    const grid = document.querySelector(".skills-grid");
+    if (!grid) return;
+
+    const catIcons = {
+      "Programming Languages": "fa-code",
+      "Frontend": "fa-layer-group",
+      "Backend": "fa-server",
+      "Databases": "fa-database",
+      "Cybersecurity": "fa-shield-halved",
+      "Cloud & DevOps": "fa-aws",
+      "Tools": "fa-wrench",
+      "Mobile": "fa-mobile-screen",
+    };
+
+    grid.innerHTML = Object.entries(res.grouped).map(([category, skills]) => {
+      const icon = catIcons[category] || "fa-laptop-code";
+      const chips = skills.map(sk => `<div class="skill-chip"><i class="${sk.icon || 'fa-solid fa-check'}"></i> ${sk.name}</div>`).join("");
+      return `
+        <div class="skill-category glass-card reveal visible">
+          <div class="skill-cat-header">
+            <div class="skill-cat-icon"><i class="fa-solid ${icon}"></i></div>
+            <h3>${category}</h3>
+          </div>
+          <div class="skill-items">${chips}</div>
+        </div>
+      `;
+    }).join("");
+  });
+
+  // 5. Certifications
+  safeFetch("/certifications/").then(res => {
+    if (!res || !res.data || !res.data.length) return;
+    const grid = document.querySelector(".certs-grid");
+    if (!grid) return;
+
+    grid.innerHTML = res.data.map(cert => {
+      const verifyLink = cert.verificationUrl && cert.verificationUrl !== "#"
+        ? `<a href="${cert.verificationUrl}" target="_blank" class="cert-verify">Verify <i class="fa-solid fa-external-link"></i></a>`
+        : (cert.fileUrl ? `<a href="${cert.fileUrl}" target="_blank" class="cert-verify">View Certificate <i class="fa-solid fa-file-pdf"></i></a>` : "");
+
+      return `
+        <div class="cert-card glass-card reveal visible">
+          <div class="cert-icon"><i class="fa-solid fa-award"></i></div>
+          <div class="cert-content">
+            <span class="cert-issuer">${cert.issuer}</span>
+            <h3>${cert.name}</h3>
+            <p>${cert.description || ''}</p>
+            <div class="cert-footer">
+              <span class="cert-badge ${cert.badgeClass || ''}">${cert.badgeText || 'Cert'}</span>
+              ${verifyLink}
+            </div>
+          </div>
+          <div class="cert-glow"></div>
+        </div>
+      `;
+    }).join("");
+  });
+
+  // 6. Resume link
+  safeFetch("/resume/").then(res => {
+    if (!res || !res.data || !res.data.fileUrl) return;
+    const url = res.data.fileUrl;
+    const btnDown = document.getElementById("btn-download-resume") || document.getElementById("btn-resume");
+    const btnView = document.getElementById("btn-view-resume");
+    if (btnDown) btnDown.href = url;
+    if (btnView) btnView.href = url;
+    const filenameEl = document.querySelector(".resume-filename");
+    if (filenameEl && res.data.filename) filenameEl.textContent = res.data.filename;
+  });
+
+  // 7. Site Settings & SEO
+  safeFetch("/settings/").then(res => {
+    if (!res || !res.data) return;
+    const s = res.data;
+    if (s.portfolioTitle) document.title = s.portfolioTitle;
+    if (s.seoDescription) {
+      const descMeta = document.querySelector("meta[name='description']");
+      if (descMeta) descMeta.content = s.seoDescription;
+    }
+  });
+
+  // Re-bind magnetic buttons after dynamic insertion
+  if (typeof initMagneticButtons === "function") initMagneticButtons();
+})();
