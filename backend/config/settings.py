@@ -8,18 +8,34 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+from django.core.exceptions import ImproperlyConfigured
+
+
+def _str_to_bool(val, default=False):
+    if val is None:
+        return default
+    return str(val).strip().lower() in ('true', '1', 'yes', 't')
+
+
 # Load environment variables from backend/.env
 dotenv_path = BASE_DIR / '.env'
 if dotenv_path.exists():
     load_dotenv(dotenv_path)
 
-# Security settings
-SECRET_KEY = os.getenv(
-    'SECRET_KEY',
-    'django-insecure-portfolio-dev-secret-key-replace-in-production'
-)
+DEBUG = _str_to_bool(os.getenv('DEBUG', 'True'), default=True)
 
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't', 'yes')
+# Security: SECRET_KEY configuration
+_raw_secret = os.getenv('SECRET_KEY')
+if not DEBUG:
+    if not _raw_secret or _raw_secret.startswith('django-insecure-') or len(_raw_secret) < 50:
+        raise ImproperlyConfigured(
+            "Production security configuration error: A valid, secure SECRET_KEY "
+            "(minimum 50 characters, not starting with 'django-insecure-') "
+            "must be configured in the environment when DEBUG=False."
+        )
+    SECRET_KEY = _raw_secret
+else:
+    SECRET_KEY = _raw_secret or 'django-insecure-portfolio-dev-secret-key-replace-in-production'
 
 allowed_hosts_raw = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
 ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_raw.split(',') if h.strip()]
@@ -118,15 +134,32 @@ FILE_STORAGE_PROVIDER = os.getenv('FILE_STORAGE_PROVIDER', 'local')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Session and CSRF Security
+# Session, CSRF and Production SSL Security
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_AGE = 86400 * 7  # 7 days
 
 CSRF_COOKIE_HTTPONLY = False  # Must be readable by frontend JS to attach X-CSRFToken
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = not DEBUG
+
+# Reverse Proxy SSL Header (for Render / Heroku / Cloud load balancers)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = _str_to_bool(os.getenv('SECURE_SSL_REDIRECT', 'True'), default=True)
+    SESSION_COOKIE_SECURE = _str_to_bool(os.getenv('SESSION_COOKIE_SECURE', 'True'), default=True)
+    CSRF_COOKIE_SECURE = _str_to_bool(os.getenv('CSRF_COOKIE_SECURE', 'True'), default=True)
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _str_to_bool(os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True'), default=True)
+    SECURE_HSTS_PRELOAD = _str_to_bool(os.getenv('SECURE_HSTS_PRELOAD', 'True'), default=True)
+else:
+    SECURE_SSL_REDIRECT = _str_to_bool(os.getenv('SECURE_SSL_REDIRECT', 'False'), default=False)
+    SESSION_COOKIE_SECURE = _str_to_bool(os.getenv('SESSION_COOKIE_SECURE', 'False'), default=False)
+    CSRF_COOKIE_SECURE = _str_to_bool(os.getenv('CSRF_COOKIE_SECURE', 'False'), default=False)
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _str_to_bool(os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False'), default=False)
+    SECURE_HSTS_PRELOAD = _str_to_bool(os.getenv('SECURE_HSTS_PRELOAD', 'False'), default=False)
 
 csrf_trusted_raw = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_trusted_raw.split(',') if o.strip()]

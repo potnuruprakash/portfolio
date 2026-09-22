@@ -237,3 +237,93 @@ class PublicPortfolioHomepageTest(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, "Potnuru Prakash")
         self.assertContains(res, "intro-video")
+
+
+import os
+import sys
+import subprocess
+from django.conf import settings
+
+
+class DeploymentSecurityTests(TestCase):
+    def test_development_security_defaults(self):
+        """Verify local development environment settings defaults."""
+        self.assertFalse(settings.SECURE_SSL_REDIRECT)
+        self.assertFalse(settings.SESSION_COOKIE_SECURE)
+        self.assertFalse(settings.CSRF_COOKIE_SECURE)
+        self.assertEqual(settings.SECURE_HSTS_SECONDS, 0)
+        self.assertFalse(settings.SECURE_HSTS_INCLUDE_SUBDOMAINS)
+        self.assertFalse(settings.SECURE_HSTS_PRELOAD)
+
+    def test_production_security_settings_and_deploy_check(self):
+        """Verify production settings when DEBUG=False and that check --deploy succeeds."""
+        env = os.environ.copy()
+        env["DEBUG"] = "False"
+        env["SECRET_KEY"] = "super-secure-production-secret-key-that-is-at-least-64-characters-long-and-random-12345"
+        env["ALLOWED_HOSTS"] = "render-portfolio.onrender.com"
+        env["CSRF_TRUSTED_ORIGINS"] = "https://render-portfolio.onrender.com"
+
+        # Verify python manage.py check --deploy passes with 0 warnings
+        proc = subprocess.run(
+            [sys.executable, "manage.py", "check", "--deploy"],
+            cwd=settings.BASE_DIR,
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(proc.returncode, 0, f"check --deploy failed:\n{proc.stderr}\n{proc.stdout}")
+        self.assertIn("System check identified no issues", proc.stderr + proc.stdout)
+
+        # Verify setting values in production environment
+        code = (
+            "from django.conf import settings; "
+            "print(f'{settings.DEBUG},{settings.SECURE_SSL_REDIRECT},{settings.SESSION_COOKIE_SECURE},{settings.CSRF_COOKIE_SECURE},{settings.SECURE_HSTS_SECONDS}')"
+        )
+        proc_eval = subprocess.run(
+            [sys.executable, "-c", code],
+            cwd=settings.BASE_DIR,
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(proc_eval.returncode, 0)
+        out = proc_eval.stdout.strip()
+        self.assertEqual(out, "False,True,True,True,31536000")
+
+    def test_production_refuses_missing_secret_key(self):
+        """Verify production refuses to boot with missing SECRET_KEY."""
+        env = os.environ.copy()
+        env["DEBUG"] = "False"
+        env["SECRET_KEY"] = ""
+
+        proc = subprocess.run(
+            [sys.executable, "-c", "import config.settings"],
+            cwd=settings.BASE_DIR,
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("ImproperlyConfigured", proc.stderr)
+        self.assertIn("Production security configuration error", proc.stderr)
+
+    def test_production_refuses_django_insecure_secret_key(self):
+        """Verify production refuses to boot with django-insecure- SECRET_KEY."""
+        env = os.environ.copy()
+        env["DEBUG"] = "False"
+        insecure_key = "django-insecure-unusable-weak-dev-key-12345678901234567890"
+        env["SECRET_KEY"] = insecure_key
+
+        proc = subprocess.run(
+            [sys.executable, "-c", "import config.settings"],
+            cwd=settings.BASE_DIR,
+            env=env,
+            capture_output=True,
+            text=True
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("ImproperlyConfigured", proc.stderr)
+        self.assertIn("Production security configuration error", proc.stderr)
+        # Ensure secret is not printed in output
+        self.assertNotIn(insecure_key, proc.stderr)
+
