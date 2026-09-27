@@ -37,7 +37,7 @@ if not DEBUG:
 else:
     SECRET_KEY = _raw_secret or 'django-insecure-portfolio-dev-secret-key-replace-in-production'
 
-allowed_hosts_raw = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost')
+allowed_hosts_raw = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,.onrender.com')
 ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_raw.split(',') if h.strip()]
 
 # Application definition
@@ -161,7 +161,10 @@ else:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = _str_to_bool(os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False'), default=False)
     SECURE_HSTS_PRELOAD = _str_to_bool(os.getenv('SECURE_HSTS_PRELOAD', 'False'), default=False)
 
-csrf_trusted_raw = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000')
+csrf_trusted_raw = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://127.0.0.1:8000,http://localhost:8000,https://*.onrender.com,https://portfolio-dhbo.onrender.com'
+)
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in csrf_trusted_raw.split(',') if o.strip()]
 
 # Cache for rate limiting and session protection
