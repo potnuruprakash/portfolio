@@ -10,6 +10,13 @@ from api import views
 frontend_dir = settings.BASE_DIR.parent / 'frontend'
 certificates_dir = settings.BASE_DIR.parent / 'Certificates'
 
+def frontend_asset_serve(request, path):
+    response = serve(request, path, document_root=frontend_dir)
+    if path.endswith(('.js', '.css', '.html')):
+        response['Cache-Control'] = 'no-cache, must-revalidate, max-age=0'
+    return response
+
+
 urlpatterns = [
     # ── Public Portfolio Homepage ──
     path('', views.public_portfolio_view, name='public-portfolio'),
@@ -31,8 +38,7 @@ urlpatterns = [
     # ── Frontend Root Assets (styles.css, script.js, intro.mp4, profile.png, resume.pdf, etc.) ──
     re_path(
         r'^(?P<path>[^/]+\.(?:css|js|png|jpg|jpeg|svg|mp4|webm|pdf|ico|webp|woff|woff2|ttf|map))$',
-        serve,
-        {'document_root': frontend_dir}
+        frontend_asset_serve
     ),
 
     # ── Media Uploads Directory (uploads, photos, certificates) ──

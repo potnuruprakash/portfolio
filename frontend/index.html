@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2026092702" />
 </head>
 <body class="intro-active">
 
@@ -28,6 +28,31 @@
       <p class="loader-text">Initializing...</p>
     </div>
   </div>
+
+  <script>
+    // Bulletproof fallback: If external script is cached/delayed/blocked, always unlock after 3.5s
+    setTimeout(function() {
+      var loader = document.getElementById("loading-screen");
+      var portfolio = document.getElementById("portfolio");
+      var overlay = document.getElementById("intro-overlay");
+      if (loader && !loader.classList.contains("hidden") && !window.__portfolioReady) {
+        loader.classList.add("fade-out", "hidden");
+        loader.style.display = "none";
+        if (overlay) {
+          overlay.classList.add("hidden");
+          overlay.style.display = "none";
+        }
+        if (portfolio) {
+          portfolio.style.visibility = "visible";
+          portfolio.style.opacity = "1";
+          portfolio.removeAttribute("aria-hidden");
+        }
+        document.documentElement.classList.remove("intro-active");
+        document.body.classList.remove("intro-active");
+        document.body.style.overflow = "";
+      }
+    }, 3500);
+  </script>
 
   <!-- ═══════════════════ INTRO VIDEO OVERLAY ═══════════════════ -->
   <div id="intro-overlay" role="dialog" aria-modal="true" aria-label="Intro Video">
@@ -803,6 +828,6 @@
 
   </main>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2026092702"></script>
 </body>
 </html>

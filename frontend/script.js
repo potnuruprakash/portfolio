@@ -157,6 +157,7 @@
     document.documentElement.classList.remove("intro-active");
     document.body.classList.remove("intro-active");
     document.body.style.overflow = "";
+    window.__portfolioReady = true;
 
     // Remove overlay from accessibility & DOM display after cinematic fade
     setTimeout(() => {
@@ -184,8 +185,8 @@
     skip.addEventListener("click", finishIntro);
   }
 
-  // ── Safety timeout in case of unexpected video hang
-  setTimeout(finishIntro, 25000);
+  // ── Safety timeout in case of unexpected video hang (video is ~10s long)
+  setTimeout(finishIntro, 12000);
 })();
 
 /* ──────────────────────────────────────────────────────────────
