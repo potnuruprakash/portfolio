@@ -1143,6 +1143,16 @@
       link.addEventListener('click', () => switchTab(link.dataset.tab));
     });
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
     // ── MODAL CONTROLLERS ──
     function openModal(title, bodyHtml, footerHtml) {
       document.getElementById('modal-title').textContent = title;
@@ -1649,12 +1659,13 @@
       tbody.innerHTML = res.data.map(e => `
         <tr>
           <td>${e.displayOrder ?? 0}</td>
-          <td><strong>${e.degree}</strong></td>
-          <td>${e.institution}</td>
-          <td>${e.startDate} – ${e.endDate}</td>
+          <td><strong>${escapeHtml(e.degree)}</strong></td>
+          <td>${escapeHtml(e.institution)}</td>
+          <td>${escapeHtml(e.startDate)} – ${escapeHtml(e.endDate)}</td>
           <td><span class="badge ${e.visible ? 'badge-success' : 'badge-warning'}">${e.visible ? 'Visible' : 'Hidden'}</span></td>
           <td>
-            <button class="btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteEdu('${e.id}')"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn-action" style="padding: 4px 8px; font-size: 11px;" title="Edit" onclick="openEditEduModal('${e.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn-danger" style="padding: 4px 8px; font-size: 11px;" title="Delete" onclick="deleteEdu('${e.id}')"><i class="fa-solid fa-trash"></i></button>
           </td>
         </tr>
       `).join('');
@@ -1663,47 +1674,138 @@
     function openAddEduModal() {
       const body = `
         <div class="form-group">
-          <label>Degree / Qualification</label>
-          <input type="text" id="m-edu-degree" required />
+          <label>Degree / Qualification *</label>
+          <input type="text" id="m-edu-degree" placeholder="e.g. B.Tech in Computer Science & Engineering" required />
         </div>
         <div class="form-group">
-          <label>Institution</label>
-          <input type="text" id="m-edu-inst" required />
+          <label>Institution / College *</label>
+          <input type="text" id="m-edu-inst" placeholder="e.g. Gayatri Vidya Parishad College of Engineering" required />
         </div>
         <div class="form-group">
-          <label>Start Date</label>
-          <input type="text" id="m-edu-start" placeholder="e.g. 2024" required />
+          <label>Location (City / State)</label>
+          <input type="text" id="m-edu-loc" placeholder="e.g. Visakhapatnam, Andhra Pradesh" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Start Date / Year *</label>
+            <input type="text" id="m-edu-start" placeholder="e.g. 2024" required />
+          </div>
+          <div class="form-group">
+            <label>End Date / Year *</label>
+            <input type="text" id="m-edu-end" placeholder="e.g. 2027" required />
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Grade / CGPA</label>
+            <input type="text" id="m-edu-grade" placeholder="e.g. 8.8 CGPA" />
+          </div>
+          <div class="form-group">
+            <label>Display Order</label>
+            <input type="number" id="m-edu-order" value="0" />
+          </div>
         </div>
         <div class="form-group">
-          <label>End Date</label>
-          <input type="text" id="m-edu-end" placeholder="e.g. 2027" required />
+          <label>Description / Highlights</label>
+          <textarea id="m-edu-desc" rows="3" placeholder="Key subjects, honors, achievements..."></textarea>
         </div>
-        <div class="form-group">
-          <label>Description</label>
-          <textarea id="m-edu-desc" rows="2"></textarea>
+        <div style="display: flex; gap: 20px; margin-top: 8px;">
+          <label><input type="checkbox" id="m-edu-visible" checked /> Visible on portfolio</label>
         </div>
       `;
       const footer = `
         <button class="btn-secondary" onclick="closeModal()">Cancel</button>
-        <button class="btn-action" onclick="submitEdu()">Add Education</button>
+        <button class="btn-action" onclick="submitEdu(null)">Add Education</button>
       `;
       openModal("Add Education", body, footer);
     }
 
-    async function submitEdu() {
+    async function openEditEduModal(id) {
+      const res = await apiRequest(`/api/admin/education/${id}/`);
+      if (!res.success) return showToast("Education record not found", "error");
+      const e = res.data;
+      const body = `
+        <div class="form-group">
+          <label>Degree / Qualification *</label>
+          <input type="text" id="m-edu-degree" value="${escapeHtml(e.degree || '')}" required />
+        </div>
+        <div class="form-group">
+          <label>Institution / College *</label>
+          <input type="text" id="m-edu-inst" value="${escapeHtml(e.institution || '')}" required />
+        </div>
+        <div class="form-group">
+          <label>Location (City / State)</label>
+          <input type="text" id="m-edu-loc" value="${escapeHtml(e.location || '')}" placeholder="e.g. Visakhapatnam, Andhra Pradesh" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Start Date / Year *</label>
+            <input type="text" id="m-edu-start" value="${escapeHtml(e.startDate || '')}" required />
+          </div>
+          <div class="form-group">
+            <label>End Date / Year *</label>
+            <input type="text" id="m-edu-end" value="${escapeHtml(e.endDate || '')}" required />
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label>Grade / CGPA</label>
+            <input type="text" id="m-edu-grade" value="${escapeHtml(e.grade || '')}" placeholder="e.g. 8.8 CGPA" />
+          </div>
+          <div class="form-group">
+            <label>Display Order</label>
+            <input type="number" id="m-edu-order" value="${e.displayOrder ?? 0}" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description / Highlights</label>
+          <textarea id="m-edu-desc" rows="3">${escapeHtml(e.description || '')}</textarea>
+        </div>
+        <div style="display: flex; gap: 20px; margin-top: 8px;">
+          <label><input type="checkbox" id="m-edu-visible" ${e.visible !== false ? 'checked' : ''} /> Visible on portfolio</label>
+        </div>
+      `;
+      const footer = `
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-action" onclick="submitEdu('${id}')">Save Changes</button>
+      `;
+      openModal("Edit Education", body, footer);
+    }
+
+    async function submitEdu(id) {
+      const degree = document.getElementById('m-edu-degree').value.trim();
+      const institution = document.getElementById('m-edu-inst').value.trim();
+      const startDate = document.getElementById('m-edu-start').value.trim();
+      const endDate = document.getElementById('m-edu-end').value.trim();
+
+      if (!degree || !institution || !startDate || !endDate) {
+        showToast("Please fill in Degree, Institution, Start Date, and End Date.", "error");
+        return;
+      }
+
       const payload = {
-        degree: document.getElementById('m-edu-degree').value.trim(),
-        institution: document.getElementById('m-edu-inst').value.trim(),
-        startDate: document.getElementById('m-edu-start').value.trim(),
-        endDate: document.getElementById('m-edu-end').value.trim(),
+        degree: degree,
+        institution: institution,
+        location: document.getElementById('m-edu-loc') ? document.getElementById('m-edu-loc').value.trim() : "",
+        startDate: startDate,
+        endDate: endDate,
+        grade: document.getElementById('m-edu-grade') ? document.getElementById('m-edu-grade').value.trim() : "",
+        displayOrder: parseInt(document.getElementById('m-edu-order')?.value || "0", 10),
         description: document.getElementById('m-edu-desc').value.trim(),
-        visible: true
+        visible: document.getElementById('m-edu-visible').checked
       };
-      const res = await apiRequest('/api/admin/education/', 'POST', payload);
+
+      const url = id ? `/api/admin/education/${id}/` : '/api/admin/education/';
+      const method = id ? 'PUT' : 'POST';
+      const res = await apiRequest(url, method, payload);
+
       if (res.success) {
-        showToast("Education record created");
+        showToast(id ? "Education record updated successfully!" : "Education record created successfully!");
         closeModal();
         loadEducation();
+      } else {
+        const errDetail = typeof res.error === 'object' ? JSON.stringify(res.error) : res.error;
+        showToast("Failed to save: " + errDetail, "error");
       }
     }
 
