@@ -870,6 +870,115 @@ document.getElementById("nav-logo-link")?.addEventListener("click", (e) => {
     }
   });
 
+  // 8. Experience & Education Timeline
+  Promise.all([safeFetch("/education/"), safeFetch("/experience/")]).then(([eduRes, expRes]) => {
+    const eduList = (eduRes && eduRes.data && eduRes.data.length) ? eduRes.data : [];
+    const expList = (expRes && expRes.data && expRes.data.length) ? expRes.data : [];
+    if (!eduList.length && !expList.length) return;
+
+    const timelineContainer = document.querySelector(".timeline");
+    if (!timelineContainer) return;
+
+    const items = [];
+
+    eduList.forEach(e => {
+      if (e.visible === false) return;
+      const startY = parseInt(e.startDate) || 0;
+      const endY = parseInt(e.endDate) || 0;
+      const dateStr = (e.startDate && e.endDate && e.startDate !== e.endDate)
+        ? `${e.startDate} – ${e.endDate}`
+        : (e.endDate || e.startDate || "");
+      items.push({
+        type: "education",
+        title: e.degree,
+        org: e.institution,
+        desc: e.description || "",
+        tags: e.tags || [],
+        date: dateStr,
+        startYear: startY,
+        endYear: endY,
+        order: e.displayOrder ?? 0,
+        badge: "Education",
+        badgeClass: "timeline-badge",
+        icon: "fa-solid fa-university"
+      });
+    });
+
+    expList.forEach(x => {
+      if (x.visible === false) return;
+      const startY = parseInt(x.startDate) || 0;
+      const endY = parseInt(x.endDate) || 0;
+      const dateStr = x.currentlyWorking
+        ? `${x.startDate || ''} – Present`
+        : ((x.startDate && x.endDate && x.startDate !== x.endDate)
+            ? `${x.startDate} – ${x.endDate}`
+            : (x.startDate || x.endDate || ""));
+      items.push({
+        type: "experience",
+        title: x.company,
+        org: x.role,
+        desc: x.description || "",
+        tags: (x.technologies && x.technologies.length) ? x.technologies : (x.responsibilities || []),
+        date: dateStr,
+        startYear: startY,
+        endYear: endY,
+        order: x.displayOrder ?? 0,
+        badge: x.employmentType || "Experience",
+        badgeClass: "timeline-badge-purple",
+        icon: "fa-solid fa-briefcase"
+      });
+    });
+
+    // Sort newest to oldest: compare endYear first, then startYear, then displayOrder
+    items.sort((a, b) => {
+      const yearB = b.endYear || b.startYear;
+      const yearA = a.endYear || a.startYear;
+      if (yearB !== yearA) return yearB - yearA;
+      return a.order - b.order;
+    });
+
+    // Apply alternating blue badge to second education if multiple
+    let eduCount = 0;
+    items.forEach(it => {
+      if (it.type === "education") {
+        eduCount++;
+        if (eduCount % 2 === 0) it.badgeClass = "timeline-badge timeline-badge-blue";
+      }
+    });
+
+    timelineContainer.innerHTML = items.map((item, idx) => {
+      const isLast = (idx === items.length - 1);
+      const tagsHtml = (item.tags && item.tags.length)
+        ? `<div class="timeline-tags">${item.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>`
+        : "";
+      const orgHtml = item.org
+        ? `<p class="timeline-org"><i class="${item.icon}"></i> ${item.org}</p>`
+        : "";
+      const descHtml = item.desc
+        ? `<p>${item.desc}</p>`
+        : "";
+
+      return `
+        <div class="timeline-item reveal visible">
+          <div class="timeline-marker">
+            <div class="timeline-dot"></div>
+            ${!isLast ? '<div class="timeline-line"></div>' : ''}
+          </div>
+          <div class="timeline-content glass-card">
+            <div class="timeline-header">
+              <span class="${item.badgeClass}">${item.badge}</span>
+              <span class="timeline-date">${item.date}</span>
+            </div>
+            <h3>${item.title}</h3>
+            ${orgHtml}
+            ${descHtml}
+            ${tagsHtml}
+          </div>
+        </div>
+      `;
+    }).join("");
+  });
+
   // Re-bind magnetic buttons after dynamic insertion
   if (typeof initMagneticButtons === "function") initMagneticButtons();
 })();
